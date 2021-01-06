@@ -17,5 +17,6 @@ namespace TriviaServiceClientAlpha
         public int Sports { get; set; }
         public int Color { get; set; }
         public int CurrentPosition { get; set; }
+        public string playerMovement { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Newtonsoft.Json;
 using System.Dynamic;
+using System.Runtime.InteropServices;
 
 namespace TriviaServiceClientAlpha
 {
@@ -17,6 +18,14 @@ namespace TriviaServiceClientAlpha
 
         private static string URL = "http://localhost:60000/";
 
+        const int STD_INPUT_HANDLE = -10;
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern IntPtr GetStdHandle(int nStdHandle);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool CancelIoEx(IntPtr handle, IntPtr lpOverlapped);
+
         private static CancellationTokenSource tokenSource;
         private static Dictionary<int, BoardNode> board;
         private static int purpleStart;
@@ -26,10 +35,13 @@ namespace TriviaServiceClientAlpha
         private static int blueStart;
         private static int yellowStart;
         private static Player currentPlayer;
+        private static string realAnswer;
         private static string userToken;
         private static string gameID;
         private static string playerTurn;
-        private static  string userName;
+        private static int numberofPlayers = 0;
+        private static string userName;
+        private static string currentPlayerUserName;
         private static Player player1;
         private static Player player2;
         private static Player player3;
@@ -215,6 +227,7 @@ namespace TriviaServiceClientAlpha
             int position;
             CreateBoard();
             currentPlayer = new Player();
+            currentPlayer.userName = userName;
             Console.Clear();
             Console.WriteLine("What color would you like your piece?\n1.Pink\n2.Green\n3.Blue\n4.Orange" +
                 "\n5.Yellow\n6.Purple");
@@ -254,7 +267,6 @@ namespace TriviaServiceClientAlpha
                     currentPlayer.CurrentPosition = purpleStart;
                     break;
             }
-            ;
             try
             {
                 using (HttpClient client = CreateClient(URL))
@@ -273,6 +285,7 @@ namespace TriviaServiceClientAlpha
                     }
                     else
                     {
+                        myTimerActive.Elapsed += DisplayPlayersTurn;
                         myTimerActive.Interval = 1000;
                         myTimerActive.Enabled = true;
                     }
@@ -280,9 +293,147 @@ namespace TriviaServiceClientAlpha
             }
             catch (TaskCanceledException) { }
         }
-        private static async void DisplayOtherPlayersTurn(Object myObject, EventArgs myEventArgs)
+        private static async void DisplayPlayersTurn(Object myObject, EventArgs myEventArgs)
         {
+            try
+            {
+                using (HttpClient client = CreateClient(URL))
+                {
+                    string tickURL = string.Format("TriviaService/games/{0}/{1}", gameID, "false");
+                    HttpResponseMessage response = await client.GetAsync(tickURL, tokenSource.Token);
 
+                    if(response.IsSuccessStatusCode)
+                    {
+                        string result = await response.Content.ReadAsStringAsync();
+                        dynamic itemToken = JsonConvert.DeserializeObject(result);
+                        var currentPlayerToken = itemToken.currentPlayer;
+                        var player1 = itemToken.Player1;
+                        var player2 = itemToken.Player2;
+                        var player3 = itemToken.Player3;
+                        var player4 = itemToken.Player4;
+                        if (currentPlayerToken == null)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Congratulations " + currentPlayerUserName + "You won!");
+                        }
+                        if(currentPlayerToken.Nickname.Equals(userName))
+                        {
+                            myTimerActive.Enabled = false;
+                            currentPlayerUserName = currentPlayerToken.Nickname;
+                            currentPlayer.Geography = currentPlayerToken.Geography;
+                            currentPlayer.Entertainment = currentPlayerToken.Entertainment;
+                            currentPlayer.History = currentPlayerToken.History;
+                            currentPlayer.Art = currentPlayerToken.Art;
+                            currentPlayer.Science = currentPlayerToken.Science;
+                            currentPlayer.Sports = currentPlayerToken.Sports;
+                            Console.SetCursorPosition(0, 0);
+                            if (player1 != null)
+                            {
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Player1:" + player1.NickName);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Geography:" + player1.Geography + "Entertainment:" + player1.Entertainment + "History:" + player1.History + "Art:" + player1.Art + "Science:" + player1.Science + "Sports/Leisure:" + player1.Sports);
+                            }
+                            if (player2 != null)
+                            {
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Player2:" + player2.NickName);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Geography:" + player2.Geography + "Entertainment:" + player2.Entertainment + "History:" + player2.History + "Art:" + player2.Art + "Science:" + player2.Science + "Sports/Leisure:" + player2.Sports);
+                            }
+                            if (player3 != null)
+                            {
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Player3:" + player3.NickName);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Geography:" + player3.Geography + "Entertainment:" + player3.Entertainment + "History:" + player3.History + "Art:" + player3.Art + "Science:" + player3.Science + "Sports/Leisure:" + player3.Sports);
+                            }
+                            if (player4 != null)
+                            {
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Player4:" + player4.NickName);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Geography:" + player4.Geography + "Entertainment:" + player4.Entertainment + "History:" + player4.History + "Art:" + player4.Art + "Science:" + player4.Science + "Sports/Leisure:" + player4.Sports);
+                            }
+                            Console.Clear();
+                            PlayerTurn();
+                        }
+                        if(currentPlayerUserName.Equals(currentPlayerToken.Nickname))
+                        {
+                            
+                            Console.SetCursorPosition(0, 0);
+                            if(player1 != null)
+                            {
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Player1:" + player1.NickName);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Geography:" + player1.Geography + "Entertainment:" + player1.Entertainment + "History:" + player1.History + "Art:" + player1.Art + "Science:" + player1.Science + "Sports/Leisure:" + player1.Sports);
+                            }
+                            if (player2 != null)
+                            {
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Player2:" + player2.NickName);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Geography:" + player2.Geography + "Entertainment:" + player2.Entertainment + "History:" + player2.History + "Art:" + player2.Art + "Science:" + player2.Science + "Sports/Leisure:" + player2.Sports);
+                            }
+                            if (player3 != null)
+                            {
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Player3:" + player3.NickName);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Geography:" + player3.Geography + "Entertainment:" + player3.Entertainment + "History:" + player3.History + "Art:" + player3.Art + "Science:" + player3.Science + "Sports/Leisure:" + player3.Sports);
+                            }
+                            if (player4 != null)
+                            {
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Player4:" + player4.NickName);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Geography:" + player4.Geography + "Entertainment:" + player4.Entertainment + "History:" + player4.History + "Art:" + player4.Art + "Science:" + player4.Science + "Sports/Leisure:" + player4.Sports);
+                            }
+                            Console.WriteLine("Current Player Turn " + currentPlayerUserName);
+                            Console.Write(new string(' ', Console.BufferWidth));
+                            Console.SetCursorPosition(0, Console.CursorTop - 1);
+                            Console.WriteLine("Geography:" + currentPlayerToken.Geography + "Entertainment:" + currentPlayerToken.Entertainment + "History:" + currentPlayerToken.History + "Art:" + currentPlayerToken.Art + "Science:" + currentPlayerToken.Science + "Sports/Leisure:" + currentPlayerToken.Sports);
+                            Console.Write(new string(' ', Console.BufferWidth));
+                            if (itemToken.currentQuestion != null)
+                            {
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Current Question: " + itemToken.currentQuestion);
+                            }
+                            Console.Write(new string(' ', Console.BufferWidth));
+                            if(itemToken.currentQuestionAnswer != null)
+                            {
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Current Question's Answer: " + itemToken.currentQuestionAnswer);
+                            }
+
+                        }
+                        if(!currentPlayerUserName.Equals(currentPlayerToken.Nickname))
+                        {
+                            currentPlayerUserName = currentPlayerToken.Nickname;
+                            Console.Clear();
+                            Console.WriteLine("Player " + currentPlayerUserName + " Turn");
+                        }
+                    }
+                }
+            }
+            catch (TaskCanceledException) { }
         }
         private static async void DisplayLobby(Object myObject, EventArgs myEventArgs, bool isHost)
         {
@@ -290,6 +441,7 @@ namespace TriviaServiceClientAlpha
             {
                 using (HttpClient client = CreateClient(URL))
                 {
+                    tokenSource = new CancellationTokenSource();
                     string tickURL = string.Format("TriviaService/games/{0}/{1}", gameID, "true");
                     HttpResponseMessage response = await client.GetAsync(tickURL, tokenSource.Token);
 
@@ -305,6 +457,24 @@ namespace TriviaServiceClientAlpha
                         if (curren != null)
                         {
                             myTimer.Enabled = false;
+                            var handle = GetStdHandle(STD_INPUT_HANDLE);
+                            CancelIoEx(handle, IntPtr.Zero);
+                            if(player1 != null)
+                            {
+                                numberofPlayers++;
+                            }
+                            if (player2 != null)
+                            {
+                                numberofPlayers++;
+                            }
+                            if (player3 != null)
+                            {
+                                numberofPlayers++;
+                            }
+                            if (player4 != null)
+                            {
+                                numberofPlayers++;
+                            }
                             StartGame();
                         }
                         else
@@ -406,6 +576,300 @@ namespace TriviaServiceClientAlpha
                     break;
             }
         }
+
+        private static void PlayerTurn()
+        {
+            int diceRoll;
+            if (currentPlayer.Geography == 1 && currentPlayer.Entertainment == 1 && currentPlayer.History == 1 && currentPlayer.Art == 1
+                && currentPlayer.Science == 1 && currentPlayer.Sports == 1 && currentPlayer.CurrentPosition == 0)
+            {
+                finalRound();
+            }
+            Console.WriteLine(currentPlayer.userName + "'s Turn");
+            Console.WriteLine("Rolling Dice");
+            Thread.Sleep(1000);
+            diceRoll = new Random().Next(1, 6);
+            Console.WriteLine("You rolled a " + diceRoll);
+            Thread.Sleep(1000);
+            MovePlayer(diceRoll, currentPlayer.CurrentPosition);
+            if (currentPlayer.CurrentPosition == blueStart && currentPlayer.Geography != 1 || currentPlayer.CurrentPosition == pinkStart && currentPlayer.Entertainment != 1
+                    || currentPlayer.CurrentPosition == yellowStart && currentPlayer.History != 1
+                    || currentPlayer.CurrentPosition == purpleStart && currentPlayer.Art != 1 ||
+                    currentPlayer.CurrentPosition == greenStart && currentPlayer.Science != 1 || currentPlayer.CurrentPosition == orangeStart && currentPlayer.Sports != 1)
+            {
+                QuestionRound(currentPlayer.CurrentPosition, true);
+            }
+            else
+            {
+                QuestionRound(currentPlayer.CurrentPosition, false);
+            }
+        }
+
+
+        private static void finalRound()
+        {
+            Random rng = new Random();
+            ClearConsole();
+            Console.WriteLine("The Final Round");
+            int category = rng.Next(0, 5);
+            string categoryS = "";
+            switch (category)
+            {
+                case 0:
+                    categoryS = "Geography";
+                    break;
+                case 1:
+                    categoryS = "Entertainment";
+                    break;
+                case 2:
+                    categoryS = "History";
+                    break;
+                case 3:
+                    categoryS = "Art";
+                    break;
+                case 4:
+                    categoryS = "Science";
+                    break;
+                case 5:
+                    categoryS = "Sports/Leisure";
+                    break;
+            }
+            Console.WriteLine("Your question category is " + categoryS + "\nGood Luck");
+            AskQuestion(category);
+            answerQuestion(false, category);
+        }
+
+        private static void QuestionRound(int currentPostition, bool isAPiece)
+        {
+            int category;
+            
+            if (currentPostition != 0)
+            {
+                AskQuestion(board[currentPostition].Category);
+            }
+            else
+            {
+                ClearConsole();
+                Console.WriteLine("You are currently on the center which category would you like to play? Please enter the number" +
+                    "\n1.Geography\n2.Entertainment\n3.History\n4.Art\n5.Science\n6.Sports\\Leisure");
+                string userchoice = Console.ReadLine();
+                while (!int.TryParse(userchoice, out category))
+                {
+                    Console.WriteLine("Incorrect Input please enter the number associated with the category");
+                    Console.WriteLine("You are currently on the center which category would you like to play?" +
+                    "\n1.Geography\n2.Entertainment\n3.History\n4.Art\n5.Science\n6.Sports\\Leisure");
+                    userchoice = Console.ReadLine();
+                }
+                AskQuestion(category);
+            }
+            answerQuestion(isAPiece, board[currentPostition].Category);
+        }
+        private static async void answerQuestion(bool isAPiece, int category)
+        {
+            if (category != 6)
+            {
+                string userAnswser;
+                string[] userAnswerA;
+                string[] realAnswerA;
+                int correctWords = 0;
+                userAnswser = Console.ReadLine();
+                char[] charsToTrim = { '.', '\"', ',' };
+                userAnswerA = userAnswser.ToLower().Trim(charsToTrim).Split();
+                realAnswerA = realAnswer.ToLower().Trim(charsToTrim).Split();
+                if (realAnswerA.Length < userAnswerA.Length)
+                {
+                    ClearConsole();
+                    Console.WriteLine("Incorrect Answer, The correct answer is:" + realAnswer);
+                    Thread.Sleep(1000);
+                    try
+                    {
+                        using (HttpClient client = CreateClient(URL))
+                        {
+                            tokenSource = new CancellationTokenSource();
+
+                            dynamic user = new ExpandoObject();
+                            user.userToken = userToken;
+                            user.gameID = gameID;
+                            user.category = category;
+                            user.isAPiece = isAPiece;
+                            user.answeredQuestion = 0;
+                            user.playerTurn = playerTurn;
+
+                            StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+                            HttpResponseMessage response = await client.PutAsync("TriviaService/end-of-turn", content, tokenSource.Token);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                myTimerActive.Enabled = true;
+                                return;
+                            }
+                        }
+                    }
+                    catch (TaskCanceledException) { }
+                }
+                for (int i = 0; i < userAnswerA.Length; i++)
+                {
+                    for (int j = 0; j < realAnswerA.Length; j++)
+                    {
+                        if (userAnswerA[i].Equals(realAnswerA[j]))
+                        {
+                            correctWords++;
+                            break;
+                        }
+                    }
+                }
+                if (correctWords < realAnswerA.Length / 2)
+                {
+                    ClearConsole();
+                    Console.WriteLine("Incorrect Answer, The correct answer is " + realAnswer);
+                    Thread.Sleep(1000);
+                    try
+                    {
+                        using (HttpClient client = CreateClient(URL))
+                        {
+                            tokenSource = new CancellationTokenSource();
+
+                            dynamic user = new ExpandoObject();
+                            user.userToken = userToken;
+                            user.gameID = gameID;
+                            user.category = category;
+                            user.isAPiece = isAPiece;
+                            user.answeredQuestion = 0;
+                            user.playerTurn = playerTurn;
+
+                            StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+                            HttpResponseMessage response = await client.PutAsync("TriviaService/end-of-turn", content, tokenSource.Token);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                myTimerActive.Enabled = true;
+                                return;
+                            }
+                        }
+                    }
+                    catch (TaskCanceledException) { }
+                }
+                else
+                {
+                    ClearConsole();
+                    Console.WriteLine("Correct Good Job!");
+                    Console.WriteLine("The Trivia Pursuit answer was " + realAnswer);
+                    if (isAPiece)
+                    {
+                        Console.WriteLine("Congratulation " + currentPlayer.userName + " You gain a piece as well");
+                    }
+                    Thread.Sleep(1000);
+                    try
+                    {
+                        using (HttpClient client = CreateClient(URL))
+                        {
+                            tokenSource = new CancellationTokenSource();
+
+                            dynamic user = new ExpandoObject();
+                            user.userToken = userToken;
+                            user.gameID = gameID;
+                            user.category = category;
+                            user.isAPiece = isAPiece;
+                            user.answeredQuestion = 1;
+                            user.playerTurn = playerTurn;
+
+                            StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+                            HttpResponseMessage response = await client.PutAsync("TriviaService/end-of-turn", content, tokenSource.Token);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                myTimerActive.Enabled = true;
+                                return;
+                            }
+                        }
+                    }
+                    catch (TaskCanceledException) { }
+                }
+            }
+            else
+            {
+                Thread.Sleep(1000);
+                try
+                {
+                    using (HttpClient client = CreateClient(URL))
+                    {
+                        tokenSource = new CancellationTokenSource();
+
+                        dynamic user = new ExpandoObject();
+                        user.userToken = userToken;
+                        user.gameID = gameID;
+                        user.category = category;
+                        user.isAPiece = isAPiece;
+                        user.answeredQuestion = 1;
+                        user.playerTurn = playerTurn;
+
+                        StringContent content = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+                        HttpResponseMessage response = await client.PutAsync("TriviaService/end-of-turn", content, tokenSource.Token);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            myTimerActive.Enabled = true;
+                            return;
+                        }
+                    }
+                }
+                catch (TaskCanceledException) { }
+            }
+        }
+
+        private static async void AskQuestion(int category)
+        {
+            try
+            {
+                using (HttpClient client = CreateClient(URL))
+                {
+                    dynamic card = new ExpandoObject();
+                    card.gameID = gameID;
+                    card.position = currentPlayer.CurrentPosition;
+                    card.category = category;
+                    card.playerMovement = currentPlayer.playerMovement;
+
+                    tokenSource = new CancellationTokenSource();
+                    StringContent content = new StringContent(JsonConvert.SerializeObject(card), Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await client.PostAsync("TriviaService/cards-game", content, tokenSource.Token);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        String result = await response.Content.ReadAsStringAsync();
+                        dynamic currentCard = JsonConvert.DeserializeObject(result);
+                        ClearConsole();
+                        switch (category)
+                        {
+                            case 0:
+                                Console.WriteLine(currentCard.Geography);
+                                realAnswer = currentCard.GeographyA;
+                                break;
+                            case 1:
+                                Console.WriteLine(currentCard.Entertainment);
+                                realAnswer = currentCard.EntertainmentA;
+                                break;
+                            case 2:
+                                Console.WriteLine(currentCard.History);
+                                realAnswer = currentCard.HistoryA;
+                                break;
+                            case 3:
+                                Console.WriteLine(currentCard.Art);
+                                realAnswer = currentCard.ArtA;
+                                break;
+                            case 4:
+                                Console.WriteLine(currentCard.Science);
+                                realAnswer = currentCard.ScienceA;
+                                break;
+                            case 5:
+                                Console.WriteLine(currentCard.Sports);
+                                realAnswer = currentCard.SportsA;
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (TaskCanceledException) { }
+        }
         private static void MovePlayer(int spaces, int currentPosition)
         {
             if (currentPosition != 0)
@@ -433,19 +897,24 @@ namespace TriviaServiceClientAlpha
                 {
                     case "straight":
                         currentPlayer.CurrentPosition = straight.position;
+                        currentPlayer.playerMovement = "S" + spaces;
                         break;
                     case "left":
                         currentPlayer.CurrentPosition = left.position;
+                        currentPlayer.playerMovement = "L" + spaces;
                         break;
                     case "right":
                         currentPlayer.CurrentPosition = right.position;
+                        currentPlayer.playerMovement = "R" + spaces;
                         break;
                     case "backwards":
                         currentPlayer.CurrentPosition = backwards.position;
+                        currentPlayer.playerMovement = "B" + spaces;
                         break;
                     case "center":
                         if (straight.position != 0)
                         {
+                            currentPlayer.playerMovement = "C" + (spaces - straight.position) +".";
                             currentPlayer.CurrentPosition = traversePaths(straight.position).position;
                         }
                         break;
@@ -477,16 +946,22 @@ namespace TriviaServiceClientAlpha
             switch (choice.ToLower())
             {
                 case "blue":
+                    currentPlayer.playerMovement = currentPlayer.playerMovement + "BP" + spaces;
                     return blue;
                 case "pink":
+                    currentPlayer.playerMovement = currentPlayer.playerMovement + "PiP" + spaces;
                     return pink;
                 case "yellow":
+                    currentPlayer.playerMovement = currentPlayer.playerMovement + "YP" + spaces;
                     return yellow;
                 case "purple":
+                    currentPlayer.playerMovement = currentPlayer.playerMovement + "PuP" + spaces;
                     return purple;
                 case "green":
+                    currentPlayer.playerMovement = currentPlayer.playerMovement + "GP" + spaces;
                     return green;
                 case "orange":
+                    currentPlayer.playerMovement = currentPlayer.playerMovement + "OP" + spaces;
                     return orange;
             }
             return null;
@@ -1106,6 +1581,17 @@ namespace TriviaServiceClientAlpha
             board[count - 1].right = board[count];
             board[blueStart].left = board[count];
             board[count].position = count;
+        }
+        private static void ClearConsole()
+        {
+            Console.SetCursorPosition(0, 4);
+            Console.Write(new String(' ', Console.BufferWidth));
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.WriteLine(currentPlayer.userName);
+            Console.Write(new String(' ', Console.BufferWidth));
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.WriteLine("Geography:" + currentPlayer.Geography + " Entertainment:" + currentPlayer.Entertainment + " History:" + currentPlayer.History +
+                " Art:" + currentPlayer.Art + " Science:" + currentPlayer.Science + " Sports/Leisure:" + currentPlayer.Sports);
         }
 
         public static HttpClient CreateClient(string url)
