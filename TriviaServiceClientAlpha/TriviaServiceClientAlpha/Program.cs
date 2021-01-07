@@ -278,7 +278,7 @@ namespace TriviaServiceClientAlpha
                     {
                         currentPlayerUserName = "";
                         myTimerActive.Elapsed += DisplayPlayersTurn;
-                        myTimerActive.Interval = 15000;
+                        myTimerActive.Interval = 1000;
                         myTimerActive.Enabled = true;
                     }
                 }
@@ -319,108 +319,84 @@ namespace TriviaServiceClientAlpha
                             currentPlayer.Art = currentPlayerToken.Art;
                             currentPlayer.Science = currentPlayerToken.Science;
                             currentPlayer.Sports = currentPlayerToken.Sports;
+                            for (int i = Console.CursorTop; i >= 0; i--)
+                            {
+                                Console.SetCursorPosition(0, i);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                            }
                             Console.SetCursorPosition(0, 0);
                             if (player1 != null)
                             {
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Player1:" + player1.Nickname);
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Geography:" + player1.Geography + " Entertainment:" + player1.Entertainment + " History:" + player1.History + " Art:" + player1.Art + " Science:" + player1.Science + " Sports/Leisure:" + player1.Sports);
                             }
                             if (player2 != null)
                             {
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Player2:" + player2.Nickname);
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Geography:" + player2.Geography + " Entertainment:" + player2.Entertainment + " History:" + player2.History + " Art:" + player2.Art + " Science:" + player2.Science + " Sports/Leisure:" + player2.Sports);
                             }
                             if (player3 != null)
                             {
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Player3:" + player3.Nickname);
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Geography:" + player3.Geography + " Entertainment:" + player3.Entertainment + " History:" + player3.History + " Art:" + player3.Art + " Science:" + player3.Science + " Sports/Leisure:" + player3.Sports);
                             }
                             if (player4 != null)
                             {
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Player4:" + player4.Nickname);
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Geography:" + player4.Geography + " Entertainment:" + player4.Entertainment + " History:" + player4.History + " Art:" + player4.Art + " Science:" + player4.Science + " Sports/Leisure:" + player4.Sports);
                             }
                             ClearConsole();
                             PlayerTurn();
                         }
-                        if(currentPlayerUserName.Equals(currentPlayerTNickName))
+                        else if(currentPlayerUserName.Equals(currentPlayerTNickName))
                         {
-                            
+                            for (int i = Console.CursorTop; i >= 0; i--)
+                            {
+                                Console.SetCursorPosition(0, i);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                            }
                             Console.SetCursorPosition(0, 0);
                             if (player1 != null)
                             {
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Player1:" + player1.Nickname);
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Geography:" + player1.Geography + " Entertainment:" + player1.Entertainment + " History:" + player1.History + " Art:" + player1.Art + " Science:" + player1.Science + " Sports/Leisure:" + player1.Sports);
                             }
                             if (player2 != null)
                             {
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Player2:" + player2.Nickname);
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Geography:" + player2.Geography + " Entertainment:" + player2.Entertainment + " History:" + player2.History + " Art:" + player2.Art + " Science:" + player2.Science + " Sports/Leisure:" + player2.Sports);
                             }
                             if (player3 != null)
                             {
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Player3:" + player3.Nickname);
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Geography:" + player3.Geography + " Entertainment:" + player3.Entertainment + " History:" + player3.History + " Art:" + player3.Art + " Science:" + player3.Science + " Sports/Leisure:" + player3.Sports);
                             }
                             if (player4 != null)
                             {
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Player4:" + player4.Nickname);
-                                Console.Write(new string(' ', Console.BufferWidth));
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Geography:" + player4.Geography + " Entertainment:" + player4.Entertainment + " History:" + player4.History + " Art:" + player4.Art + " Science:" + player4.Science + " Sports/Leisure:" + player4.Sports);
                             }
                             Console.WriteLine("Current Player Turn " + currentPlayerUserName);
-                            Console.Write(new string(' ', Console.BufferWidth));
-                            Console.SetCursorPosition(0, Console.CursorTop - 1);
                             Console.WriteLine("Geography:" + currentPlayerToken.Geography + " Entertainment:" + currentPlayerToken.Entertainment + " History:" + currentPlayerToken.History + " Art:" + currentPlayerToken.Art + " Science:" + currentPlayerToken.Science + " Sports/Leisure:" + currentPlayerToken.Sports);
-                            Console.Write(new string(' ', Console.BufferWidth));
                             if (itemToken.currentQuestion != null)
                             {
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Current Question: " + itemToken.currentQuestion);
                             }
-                            Console.Write(new string(' ', Console.BufferWidth));
                             if(itemToken.currentQuestionAnswer != null)
                             {
-                                Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Current Question's Answer: " + itemToken.currentQuestionAnswer);
                             }
 
                         }
-                        if(!currentPlayerUserName.Equals(currentPlayerToken.Nickname))
+                        else if(!currentPlayerUserName.Equals(currentPlayerTNickName))
                         {
                             currentPlayerUserName = currentPlayerToken.Nickname;
-                            Console.Clear();
+                            for (int i = Console.CursorTop; i >= 0; i--)
+                            {
+                                Console.SetCursorPosition(0, i);
+                                Console.Write(new string(' ', Console.BufferWidth));
+                            }
+                            Console.SetCursorPosition(0, 0);
                             Console.WriteLine("Player " + currentPlayerUserName + " Turn");
                         }
                     }
@@ -572,7 +548,6 @@ namespace TriviaServiceClientAlpha
             {
                 finalRound();
             }
-            Console.WriteLine(currentPlayer.userName + "'s Turn");
             Console.WriteLine("Rolling Dice");
             Thread.Sleep(1000);
             diceRoll = new Random().Next(1, 6);
@@ -622,8 +597,7 @@ namespace TriviaServiceClientAlpha
                     break;
             }
             Console.WriteLine("Your question category is " + categoryS + "\nGood Luck");
-            AskQuestion(category);
-            answerQuestion(false, category);
+            AskQuestion(category, false);
         }
 
         private static void QuestionRound(int currentPostition, bool isAPiece)
@@ -632,7 +606,7 @@ namespace TriviaServiceClientAlpha
             
             if (currentPostition != 0)
             {
-                AskQuestion(board[currentPostition].Category);
+                AskQuestion(board[currentPostition].Category, isAPiece);
             }
             else
             {
@@ -647,9 +621,8 @@ namespace TriviaServiceClientAlpha
                     "\n1.Geography\n2.Entertainment\n3.History\n4.Art\n5.Science\n6.Sports\\Leisure");
                     userchoice = Console.ReadLine();
                 }
-                AskQuestion(category);
+                AskQuestion(category, isAPiece);
             }
-            answerQuestion(isAPiece, board[currentPostition].Category);
         }
         private static async void answerQuestion(bool isAPiece, int category)
         {
@@ -688,6 +661,7 @@ namespace TriviaServiceClientAlpha
                             if (response.IsSuccessStatusCode)
                             {
                                 myTimerActive.Enabled = true;
+                                Console.Clear();
                                 return;
                             }
                         }
@@ -705,7 +679,7 @@ namespace TriviaServiceClientAlpha
                         }
                     }
                 }
-                if (correctWords < realAnswerA.Length / 2)
+                if (realAnswerA.Length%2 == 0 && correctWords < realAnswerA.Length / 2 || realAnswerA.Length % 2 != 0 && correctWords < ((realAnswerA.Length / 2) + 1))
                 {
                     ClearConsole();
                     Console.WriteLine("Incorrect Answer, The correct answer is " + realAnswer);
@@ -730,6 +704,7 @@ namespace TriviaServiceClientAlpha
                             if (response.IsSuccessStatusCode)
                             {
                                 myTimerActive.Enabled = true;
+                                Console.Clear();
                                 return;
                             }
                         }
@@ -766,6 +741,7 @@ namespace TriviaServiceClientAlpha
                             if (response.IsSuccessStatusCode)
                             {
                                 myTimerActive.Enabled = true;
+                                Console.Clear();
                                 return;
                             }
                         }
@@ -796,6 +772,7 @@ namespace TriviaServiceClientAlpha
                         if (response.IsSuccessStatusCode)
                         {
                             myTimerActive.Enabled = true;
+                            Console.Clear();
                             return;
                         }
                     }
@@ -804,21 +781,16 @@ namespace TriviaServiceClientAlpha
             }
         }
 
-        private static async void AskQuestion(int category)
+        private static async void AskQuestion(int category, bool isAPiece)
         {
             try
             {
                 using (HttpClient client = CreateClient(URL))
                 {
-                    dynamic card = new ExpandoObject();
-                    card.gameID = gameID;
-                    card.position = (int?)currentPlayer.CurrentPosition;
-                    card.category = category;
-                    card.playerMovement = currentPlayer.playerMovement;
-
+                    string cardUrl = string.Format("TriviaService/cards-game/{0}/{1}/{2}/{3}/{4}", gameID, userToken, (int?)currentPlayer.CurrentPosition, category, currentPlayer.playerMovement);
                     tokenSource = new CancellationTokenSource();
-                    StringContent content = new StringContent(JsonConvert.SerializeObject(card), Encoding.UTF8, "application/json");
-                    HttpResponseMessage response = await client.PostAsync("TriviaService/cards-game", content, tokenSource.Token);
+                    
+                    HttpResponseMessage response = await client.GetAsync(cardUrl, tokenSource.Token);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -853,6 +825,7 @@ namespace TriviaServiceClientAlpha
                                 break;
                         }
                     }
+                    answerQuestion(isAPiece, category);
                 }
             }
             catch (TaskCanceledException) { }
@@ -922,15 +895,14 @@ namespace TriviaServiceClientAlpha
             BoardNode green = traverseAllPaths(spaces, 25);
             BoardNode orange = traverseAllPaths(spaces, 31);
             Console.WriteLine("Would you like to go down the Blue, Pink, Yellow, Purple, Green, or Orange Path?");
-            string choice = Console.ReadLine();
-            while (!choice.ToLower().Equals("blue") || !choice.ToLower().Equals("pink") || !choice.ToLower().Equals("yellow") || !choice.ToLower().Equals("green") || !choice.ToLower().Equals("orange"))
+            string choice = Console.ReadLine().ToLower();
+            while (!choice.Equals("blue") && !choice.Equals("pink") && !choice.Equals("yellow") && !choice.Equals("green") && !choice.Equals("orange"))
             {
-                Console.Clear();
                 Console.WriteLine("Incorrect input");
                 Console.WriteLine("You are at the center would you like to go down the Blue, Pink, Yellow, Purple, Green, or Orange Path?");
-                choice = Console.ReadLine();
+                choice = Console.ReadLine().ToLower();
             }
-            switch (choice.ToLower())
+            switch (choice)
             {
                 case "blue":
                     currentPlayer.playerMovement = currentPlayer.playerMovement + "BP" + spaces;
@@ -1571,12 +1543,14 @@ namespace TriviaServiceClientAlpha
         }
         private static void ClearConsole()
         {
+            int numOfPlayerLine = numberofPlayers * 2;
+            for(int i = Console.CursorTop; i >= numOfPlayerLine; i--)
+            {
+                Console.SetCursorPosition(0, i);
+                Console.Write(new String(' ', Console.BufferWidth));
+            }
             Console.SetCursorPosition(0, numberofPlayers * 2);
-            Console.Write(new String(' ', Console.BufferWidth));
-            Console.SetCursorPosition(0, Console.CursorTop - 1);
-            Console.WriteLine(currentPlayer.userName);
-            Console.Write(new String(' ', Console.BufferWidth));
-            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.WriteLine("Current Player " + currentPlayer.userName + " Turn");
             Console.WriteLine("Geography:" + currentPlayer.Geography + " Entertainment:" + currentPlayer.Entertainment + " History:" + currentPlayer.History +
                 " Art:" + currentPlayer.Art + " Science:" + currentPlayer.Science + " Sports/Leisure:" + currentPlayer.Sports);
         }
