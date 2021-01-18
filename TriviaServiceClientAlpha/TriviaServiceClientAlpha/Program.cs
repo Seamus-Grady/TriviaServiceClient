@@ -15,7 +15,7 @@ namespace TriviaServiceClientAlpha
     {
         private static System.Timers.Timer myTimer = new System.Timers.Timer();
         private static System.Timers.Timer myTimerActive = new System.Timers.Timer();
-
+        //private static string URL = "http://localhost:60000/";
         private static string URL = "https://triviaservice20210107235214.azurewebsites.net/";
 
         private static CancellationTokenSource tokenSource;
